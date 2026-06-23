@@ -48,7 +48,7 @@ final class KeyEventCapture {
 
     // MARK: - Event translation
 
-    private func handle(_ event: NSEvent) {
+    func handle(_ event: NSEvent) {
         // Special keys identified by hardware key code
         if let sk = specialKey(for: event.keyCode) {
             let e = KeystrokeEvent.specialKey(sk)

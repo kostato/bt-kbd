@@ -89,5 +89,26 @@ embed.dst_subfolder_spec = '13'
 bf = embed.add_file_reference(kb_target.product_reference)
 bf.settings = { 'ATTRIBUTES' => ['RemoveHeadersOnCopy'] }
 
+# ── Unit tests ────────────────────────────────────────────────────────────────
+test_target = proj.new_target(:unit_test_bundle, 'bt-kbd-Tests', :osx, '13.0')
+test_group  = proj.main_group.new_group('bt-kbd-Tests', 'bt-kbd-Tests')
+
+Dir['bt-kbd-Tests/*.swift'].sort.each do |path|
+  ref = test_group.new_file(File.basename(path))
+  test_target.source_build_phase.add_file_reference(ref)
+end
+
+test_target.add_dependency(mac_target)
+
+test_target.build_configurations.each do |c|
+  c.build_settings.merge!({
+    'PRODUCT_BUNDLE_IDENTIFIER' => 'com.btkbd.tests',
+    'SWIFT_VERSION'             => '5.9',
+    'MACOSX_DEPLOYMENT_TARGET'  => '13.0',
+    'TEST_HOST'                 => '$(BUILT_PRODUCTS_DIR)/bt-kbd.app/Contents/MacOS/bt-kbd',
+    'BUNDLE_LOADER'             => '$(TEST_HOST)',
+  })
+end
+
 proj.save
 puts "Generated #{PROJECT_NAME}.xcodeproj"
