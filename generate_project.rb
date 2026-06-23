@@ -16,7 +16,7 @@ def add_shared(target, refs)
 end
 
 # ── macOS app ─────────────────────────────────────────────────────────────────
-mac_target = proj.new_target(:application, 'bt-kbd-Mac', :osx, '13.0')
+mac_target = proj.new_target(:application, 'bt-kbd-Mac', :osx, '14.0')
 mac_group  = proj.main_group.new_group('bt-kbd-Mac', 'bt-kbd-Mac')
 
 Dir['bt-kbd-Mac/*.swift'].sort.each do |path|
@@ -30,7 +30,7 @@ mac_target.build_configurations.each do |c|
     'PRODUCT_BUNDLE_IDENTIFIER' => 'com.btkbd.mac',
     'PRODUCT_NAME'              => 'bt-kbd',
     'SWIFT_VERSION'             => '5.9',
-    'MACOSX_DEPLOYMENT_TARGET'  => '13.0',
+    'MACOSX_DEPLOYMENT_TARGET'  => '14.0',
     'INFOPLIST_FILE'            => 'bt-kbd-Mac/Info.plist',
     'CODE_SIGN_ENTITLEMENTS'    => 'bt-kbd-Mac/bt-kbd-Mac.entitlements',
     'ENABLE_HARDENED_RUNTIME'   => 'YES',
@@ -90,7 +90,7 @@ bf = embed.add_file_reference(kb_target.product_reference)
 bf.settings = { 'ATTRIBUTES' => ['RemoveHeadersOnCopy'] }
 
 # ── Unit tests ────────────────────────────────────────────────────────────────
-test_target = proj.new_target(:unit_test_bundle, 'bt-kbd-Tests', :osx, '13.0')
+test_target = proj.new_target(:unit_test_bundle, 'bt-kbd-Tests', :osx, '14.0')
 test_group  = proj.main_group.new_group('bt-kbd-Tests', 'bt-kbd-Tests')
 
 Dir['bt-kbd-Tests/*.swift'].sort.each do |path|
@@ -102,11 +102,12 @@ test_target.add_dependency(mac_target)
 
 test_target.build_configurations.each do |c|
   c.build_settings.merge!({
-    'PRODUCT_BUNDLE_IDENTIFIER' => 'com.btkbd.tests',
-    'SWIFT_VERSION'             => '5.9',
-    'MACOSX_DEPLOYMENT_TARGET'  => '13.0',
-    'TEST_HOST'                 => '$(BUILT_PRODUCTS_DIR)/bt-kbd.app/Contents/MacOS/bt-kbd',
-    'BUNDLE_LOADER'             => '$(TEST_HOST)',
+    'PRODUCT_BUNDLE_IDENTIFIER'  => 'com.btkbd.tests',
+    'SWIFT_VERSION'              => '5.9',
+    'MACOSX_DEPLOYMENT_TARGET'  => '14.0',
+    'TEST_HOST'                  => '$(BUILT_PRODUCTS_DIR)/bt-kbd.app/Contents/MacOS/bt-kbd',
+    'BUNDLE_LOADER'              => '$(TEST_HOST)',
+    'GENERATE_INFOPLIST_FILE'    => 'YES',
   })
 end
 

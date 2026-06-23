@@ -32,7 +32,7 @@ Defined in `Shared/BTKbdProtocol.swift`, shared between the Mac app and the keyb
 
 | Component | Minimum |
 |---|---|
-| Mac app | macOS 13.0, Xcode 15 |
+| Mac app | macOS 14.0, Xcode 15 |
 | iOS app + keyboard | iOS 16.0, Xcode 15 |
 | Build tool | Ruby + `xcodeproj` gem |
 

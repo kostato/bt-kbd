@@ -1,5 +1,5 @@
 import XCTest
-@testable import bt_kbd_Mac
+@testable import bt_kbd
 
 final class KeystrokeEventTests: XCTestCase {
 

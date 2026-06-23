@@ -1,7 +1,7 @@
 import XCTest
 import AppKit
 import Carbon.HIToolbox
-@testable import bt_kbd_Mac
+@testable import bt_kbd
 
 // MARK: - Mock
 
