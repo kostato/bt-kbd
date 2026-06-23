@@ -2,6 +2,8 @@
 
 Use your Mac's physical keyboard to type into any iOS app over Bluetooth Low Energy. No cables, no pairing ceremony beyond the initial setup — just switch to the bt-kbd keyboard on your iPhone and every key you press on your Mac appears in the active iOS text field.
 
+Built for cases where an app exists only on iOS and iPhone Mirroring isn't an option — so you can type comfortably on a real keyboard instead of a phone screen.
+
 ## How it works
 
 ```
