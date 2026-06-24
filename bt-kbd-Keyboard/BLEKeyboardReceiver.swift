@@ -1,5 +1,6 @@
 import CoreBluetooth
 import Foundation
+import Security
 
 protocol BLEKeyboardReceiverDelegate: AnyObject {
     func bleReceiver(_ receiver: BLEKeyboardReceiver, didReceive event: KeystrokeEvent)
@@ -7,6 +8,51 @@ protocol BLEKeyboardReceiverDelegate: AnyObject {
     func bleReceiverDidDisconnect(_ receiver: BLEKeyboardReceiver)
     func bleReceiver(_ receiver: BLEKeyboardReceiver, didUpdateStatus status: String)
 }
+
+// MARK: - Peripheral pin store
+
+enum PeripheralPinStore {
+    private static let service = "com.btkbd.keyboard"
+    private static let account = "pinnedPeripheralUUID"
+
+    static func load() -> UUID? {
+        let query: [CFString: Any] = [
+            kSecClass:       kSecClassGenericPassword,
+            kSecAttrService: service,
+            kSecAttrAccount: account,
+            kSecReturnData:  true,
+        ]
+        var result: AnyObject?
+        guard SecItemCopyMatching(query as CFDictionary, &result) == errSecSuccess,
+              let data = result as? Data,
+              let str  = String(data: data, encoding: .utf8) else { return nil }
+        return UUID(uuidString: str)
+    }
+
+    static func save(_ id: UUID) {
+        let data = id.uuidString.data(using: .utf8)!
+        let attrs: [CFString: Any] = [
+            kSecClass:                kSecClassGenericPassword,
+            kSecAttrService:          service,
+            kSecAttrAccount:          account,
+            kSecValueData:            data,
+            kSecAttrAccessible:       kSecAttrAccessibleAfterFirstUnlock,
+        ]
+        SecItemDelete(attrs as CFDictionary)
+        SecItemAdd(attrs as CFDictionary, nil)
+    }
+
+    static func clear() {
+        let query: [CFString: Any] = [
+            kSecClass:       kSecClassGenericPassword,
+            kSecAttrService: service,
+            kSecAttrAccount: account,
+        ]
+        SecItemDelete(query as CFDictionary)
+    }
+}
+
+// MARK: - BLEKeyboardReceiver
 
 final class BLEKeyboardReceiver: NSObject {
 
@@ -28,10 +74,19 @@ final class BLEKeyboardReceiver: NSObject {
         centralManager.stopScan()
     }
 
+    func forgetAndRescan() {
+        if let p = connectedPeripheral { centralManager.cancelPeripheralConnection(p) }
+        centralManager.stopScan()
+        connectedPeripheral = nil
+        PeripheralPinStore.clear()
+        startScan()
+    }
+
     private func startScan() {
         guard centralManager.state == .poweredOn else { return }
         NSLog("[BLE] startScan for service \(kBTKbdServiceUUID)")
-        delegate?.bleReceiver(self, didUpdateStatus: "Scanning for Mac…")
+        let status = PeripheralPinStore.load() == nil ? "Scanning for Mac…" : "Reconnecting to Mac…"
+        delegate?.bleReceiver(self, didUpdateStatus: status)
         centralManager.scanForPeripherals(withServices: [serviceUUID],
                                           options: [CBCentralManagerScanOptionAllowDuplicatesKey: false])
     }
@@ -64,7 +119,13 @@ extension BLEKeyboardReceiver: CBCentralManagerDelegate {
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral,
                         advertisementData: [String: Any], rssi RSSI: NSNumber) {
         let name = peripheral.name ?? advertisementData[CBAdvertisementDataLocalNameKey] as? String ?? "Unknown"
-        NSLog("[BLE] didDiscover: \(name) (\(peripheral.identifier)) RSSI=\(RSSI)")
+
+        if let pinned = PeripheralPinStore.load(), peripheral.identifier != pinned {
+            NSLog("[BLE] didDiscover: rejected unknown peripheral")
+            return
+        }
+
+        NSLog("[BLE] didDiscover: \(name)")
         delegate?.bleReceiver(self, didUpdateStatus: "Found \(name), connecting…")
         central.stopScan()
         connectedPeripheral = peripheral
@@ -136,6 +197,10 @@ extension BLEKeyboardReceiver: CBPeripheralDelegate {
             return
         }
         if characteristic.isNotifying {
+            if let id = connectedPeripheral?.identifier, PeripheralPinStore.load() == nil {
+                PeripheralPinStore.save(id)
+                NSLog("[BLE] pinned new peripheral")
+            }
             delegate?.bleReceiver(self, didUpdateStatus: "Connected — type on your Mac")
             delegate?.bleReceiverDidConnect(self)
         }

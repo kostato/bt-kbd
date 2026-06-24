@@ -5,6 +5,7 @@ class KeyboardViewController: UIInputViewController {
     private var receiver: BLEKeyboardReceiver!
     private var statusLabel: UILabel!
     private var nextKeyboardButton: UIButton!
+    private var forgetButton: UIButton!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -60,6 +61,14 @@ class KeyboardViewController: UIInputViewController {
         statusLabel.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(statusLabel)
 
+        forgetButton = UIButton(type: .system)
+        forgetButton.setTitle("Forget Mac", for: .normal)
+        forgetButton.titleLabel?.font = .systemFont(ofSize: 12)
+        forgetButton.setTitleColor(.systemRed, for: .normal)
+        forgetButton.addTarget(self, action: #selector(forgetMac), for: .touchUpInside)
+        forgetButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(forgetButton)
+
         let height = view.heightAnchor.constraint(equalToConstant: 100)
         height.priority = UILayoutPriority(999)
         height.isActive = true
@@ -77,11 +86,20 @@ class KeyboardViewController: UIInputViewController {
             statusLabel.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             statusLabel.leadingAnchor.constraint(equalTo: nextKeyboardButton.trailingAnchor, constant: 8),
             statusLabel.trailingAnchor.constraint(equalTo: switchButton.leadingAnchor, constant: -8),
+
+            forgetButton.topAnchor.constraint(equalTo: view.topAnchor, constant: 6),
+            forgetButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -8),
         ])
     }
 
     @objc private func switchKeyboard() {
         advanceToNextInputMode()
+    }
+
+    @objc private func forgetMac() {
+        receiver.forgetAndRescan()
+        statusLabel.text = "Scanning for new Mac…"
+        statusLabel.textColor = .secondaryLabel
     }
 
     // MARK: - Apply keystroke to the document proxy

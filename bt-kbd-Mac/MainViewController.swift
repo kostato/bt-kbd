@@ -150,12 +150,11 @@ class MainViewController: NSViewController {
             setStatus(.systemYellow, "Advertising…",
                       "Open the bt-kbd app on your iPhone and activate the keyboard")
             toggleButton.isEnabled = false
+            if isCapturing { stopCapture() }
 
         case .connected(let name):
-            setStatus(.systemGreen, "Connected to \(name)",
-                      isCapturing ? "Forwarding keystrokes" : "Ready — press Start Capturing")
+            setStatus(.systemGreen, "Connected to \(name)", "Ready — press Start Capturing")
             toggleButton.isEnabled = true
-            if !isCapturing { startCapture() }
 
         case .error(let msg):
             setStatus(.systemRed, "Error", msg)
