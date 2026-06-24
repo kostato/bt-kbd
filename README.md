@@ -38,7 +38,7 @@ bt-kbd is a personal tool and has not been hardened for use in untrusted environ
 
 **Global keyboard capture on the Mac.** The Mac app intercepts keystrokes from all applications system-wide, including password managers and other sensitive apps. Capture starts automatically whenever the iPhone connects. If the iPhone disconnects unexpectedly, capture continues in the background until the user manually stops it.
 
-Both risks are acceptable for personal, single-user use on a trusted network. See [`SECURITY_REVIEW.md`](SECURITY_REVIEW.md) for full findings and proposed mitigations.
+Both risks are acceptable for personal, single-user use on a trusted network. See [`SECURITY_REVIEW.md`](docs/SECURITY_REVIEW.mdSECURITY_REVIEW.md) for full findings and proposed mitigations.
 
 ## Requirements
 
