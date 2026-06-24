@@ -1,55 +1,11 @@
 import CoreBluetooth
 import Foundation
-import Security
 
 protocol BLEKeyboardReceiverDelegate: AnyObject {
     func bleReceiver(_ receiver: BLEKeyboardReceiver, didReceive event: KeystrokeEvent)
     func bleReceiverDidConnect(_ receiver: BLEKeyboardReceiver)
     func bleReceiverDidDisconnect(_ receiver: BLEKeyboardReceiver)
     func bleReceiver(_ receiver: BLEKeyboardReceiver, didUpdateStatus status: String)
-}
-
-// MARK: - Peripheral pin store
-
-enum PeripheralPinStore {
-    private static let service = "com.btkbd.keyboard"
-    private static let account = "pinnedPeripheralUUID"
-
-    static func load() -> UUID? {
-        let query: [CFString: Any] = [
-            kSecClass:       kSecClassGenericPassword,
-            kSecAttrService: service,
-            kSecAttrAccount: account,
-            kSecReturnData:  true,
-        ]
-        var result: AnyObject?
-        guard SecItemCopyMatching(query as CFDictionary, &result) == errSecSuccess,
-              let data = result as? Data,
-              let str  = String(data: data, encoding: .utf8) else { return nil }
-        return UUID(uuidString: str)
-    }
-
-    static func save(_ id: UUID) {
-        let data = id.uuidString.data(using: .utf8)!
-        let attrs: [CFString: Any] = [
-            kSecClass:                kSecClassGenericPassword,
-            kSecAttrService:          service,
-            kSecAttrAccount:          account,
-            kSecValueData:            data,
-            kSecAttrAccessible:       kSecAttrAccessibleAfterFirstUnlock,
-        ]
-        SecItemDelete(attrs as CFDictionary)
-        SecItemAdd(attrs as CFDictionary, nil)
-    }
-
-    static func clear() {
-        let query: [CFString: Any] = [
-            kSecClass:       kSecClassGenericPassword,
-            kSecAttrService: service,
-            kSecAttrAccount: account,
-        ]
-        SecItemDelete(query as CFDictionary)
-    }
 }
 
 // MARK: - BLEKeyboardReceiver
