@@ -30,6 +30,16 @@ Defined in `Shared/BTKbdProtocol.swift`, shared between the Mac app and the keyb
 | `0x00` | Text — remaining bytes are UTF-8 |
 | `0x01`–`0x09` | Special key (delete, return, tab, escape, arrow keys, …) |
 
+## Security risks
+
+bt-kbd is a personal tool and has not been hardened for use in untrusted environments. Two risks worth understanding before deploying it:
+
+**Keystroke injection via BLE spoofing.** The keyboard extension connects to the first nearby BLE peripheral that advertises the bt-kbd service UUID. Because the UUIDs are public in this repository, any device within Bluetooth range that knows them can impersonate the Mac and inject arbitrary keystrokes into whatever app is active on the iPhone. The keyboard extension runs with Full Access, so injected input reaches any text field.
+
+**Global keyboard capture on the Mac.** The Mac app intercepts keystrokes from all applications system-wide, including password managers and other sensitive apps. Capture starts automatically whenever the iPhone connects. If the iPhone disconnects unexpectedly, capture continues in the background until the user manually stops it.
+
+Both risks are acceptable for personal, single-user use on a trusted network. See [`SECURITY_REVIEW.md`](SECURITY_REVIEW.md) for full findings and proposed mitigations.
+
 ## Requirements
 
 | Component | Minimum |
